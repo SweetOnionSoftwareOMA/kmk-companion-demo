@@ -2,7 +2,7 @@
 // KMK Companion — Demo MVP
 // Copy ALL of this file into: src/App.tsx
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-import { useState, useRef, useCallback } from "react";
+import { useState, useCallback } from "react";
 
 // ── Types ──────────────────────────────────────────────────────
 type Screen = "dashboard" | "subject" | "video" | "flashcards" | "quiz" | "profile";
