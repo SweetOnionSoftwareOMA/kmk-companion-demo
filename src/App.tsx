@@ -652,91 +652,102 @@ export default function App() {
     const [activeTab, setActiveTab] = useState<TabId>("home");
     const [screen, setScreen] = useState<Screen>("dashboard");
     const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
+    const [landscape, setLandscape] = useState(false);
 
     const navigate = useCallback((s: Screen, data?: any) => {
         if (s === "subject" && data) setSelectedSubject(data);
         setScreen(s);
-        if (s === "flashcards") setActiveTab("flashcards");
-        if (s === "quiz") setActiveTab("quizzes");
-        if (s === "video") setActiveTab("courses");
+        if (s === "flashcards") { setActiveTab("flashcards"); setLandscape(true); }
+        else if (s === "quiz") { setActiveTab("quizzes"); setLandscape(false); }
+        else if (s === "video") { setActiveTab("courses"); setLandscape(false); }
+        else setLandscape(false);
     }, []);
 
     const handleTab = (tab: TabId) => {
         setActiveTab(tab);
-        if (tab === "home") setScreen("dashboard");
-        else if (tab === "courses") setScreen("subject");
-        else if (tab === "flashcards") setScreen("flashcards");
-        else if (tab === "quizzes") setScreen("quiz");
-        else if (tab === "profile") setScreen("profile");
+        if (tab === "home") { setScreen("dashboard"); setLandscape(false); }
+        else if (tab === "courses") { setScreen("subject"); setLandscape(false); }
+        else if (tab === "flashcards") { setScreen("flashcards"); setLandscape(true); }
+        else if (tab === "quizzes") { setScreen("quiz"); setLandscape(false); }
+        else if (tab === "profile") { setScreen("profile"); setLandscape(false); }
     };
 
     const goBack = () => {
         setScreen("dashboard");
         setActiveTab("home");
+        setLandscape(false);
     };
 
+    // Phone dimensions
+    const phoneW = landscape ? 680 : 340;
+    const phoneH = landscape ? 340 : 680;
+    const screenW = landscape ? 656 : 316;
+    const screenH = landscape ? 296 : 636;
+    const screenRadius = landscape ? 24 : 28;
+
     return (
-        <div style={{ fontFamily: "Inter, system-ui, sans-serif", background: "#E5E7EB", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-            {/* Phone frame */}
-            <div>
-                <div style={{ fontSize: 11, color: "#9CA3AF", fontWeight: 600, marginBottom: 8, textAlign: "center", letterSpacing: 1, textTransform: "uppercase" as const }}>KMK Companion — Interactive Demo</div>
-                <div style={{ background: DARK, borderRadius: 44, padding: "12px 12px 0", boxShadow: "0 32px 80px rgba(0,0,0,0.35)", width: 340 }}>
-                    {/* Notch */}
-                    <div style={{ height: 26, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 4 }}>
-                        <div style={{ width: 110, height: 13, background: "#000", borderRadius: 20 }} />
+        <div style={{ fontFamily: "Inter, system-ui, sans-serif", background: "#E5E7EB", minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24, gap: 16 }}>
+
+            {/* Orientation toggle */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10, background: "#fff", borderRadius: 20, padding: "6px 8px", boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
+                <button onClick={() => setLandscape(false)} style={{ display: "flex", alignItems: "center", gap: 6, background: !landscape ? DARK : "transparent", color: !landscape ? "#fff" : MUTED, border: "none", borderRadius: 14, padding: "6px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer", transition: "all 0.2s" }}>
+                    <span style={{ fontSize: 14 }}>▯</span> Portrait
+                </button>
+                <button onClick={() => setLandscape(true)} style={{ display: "flex", alignItems: "center", gap: 6, background: landscape ? O : "transparent", color: landscape ? "#fff" : MUTED, border: "none", borderRadius: 14, padding: "6px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer", transition: "all 0.2s" }}>
+                    <span style={{ fontSize: 14 }}>▭</span> Landscape
+                </button>
+                {screen === "flashcards" && (
+                    <div style={{ background: "#FFF0EB", border: "1px solid #FFD5C4", borderRadius: 10, padding: "4px 10px" }}>
+                        <span style={{ fontSize: 10, color: "#C23200", fontWeight: 700 }}>Flashcards are landscape-only</span>
                     </div>
-                    {/* Screen */}
-                    <div style={{ background: BG, borderRadius: 32, overflow: "hidden", height: 680, display: "flex", flexDirection: "column" }}>
-
-                        {/* Flashcard landscape notice */}
-                        {screen === "flashcards" && (
-                            <div style={{ background: DARK, padding: "6px 14px", display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-                                <span style={{ fontSize: 10, color: "#9CA3AF" }}>⟺ Flashcards are landscape-only in the live app</span>
-                            </div>
-                        )}
-
-                        {/* Screen content */}
-                        {screen === "dashboard" && (
-                            <>
-                                {/* Dashboard header */}
-                                <div style={{ background: "#fff", padding: "10px 14px 8px", borderBottom: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
-                                    <div>
-                                        <div style={{ fontSize: 10, color: "#9CA3AF" }}>Good morning</div>
-                                        <div style={{ fontSize: 17, fontWeight: 800, color: DARK }}>Hey, Sarah 👋</div>
-                                        <div style={{ fontSize: 11, color: O, fontWeight: 600 }}>6-day streak — keep it up!</div>
-                                    </div>
-                                    <div style={{ width: 38, height: 38, borderRadius: "50%", background: `linear-gradient(135deg, ${O}, #FF6B35)`, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800 }}>S</div>
-                                </div>
-                                <Dashboard onNavigate={navigate} />
-                            </>
-                        )}
-
-                        {screen === "subject" && (
-                            <SubjectDetail subject={selectedSubject || subjects[0]} onBack={goBack} onNavigate={navigate} />
-                        )}
-
-                        {screen === "video" && <VideoPlayer onBack={goBack} />}
-
-                        {screen === "flashcards" && (
-                            <FlashCards onBack={goBack} />
-                        )}
-
-                        {screen === "quiz" && <QuizScreen onBack={goBack} />}
-
-                        {screen === "profile" && (
-                            <>
-                                <div style={{ background: "#fff", padding: "10px 14px", borderBottom: `1px solid ${BORDER}`, flexShrink: 0 }}>
-                                    <div style={{ fontSize: 16, fontWeight: 700, color: DARK }}>Profile</div>
-                                </div>
-                                <ProfileScreen />
-                            </>
-                        )}
-
-                        <BottomNav active={activeTab} onTab={handleTab} />
-                    </div>
-                </div>
-                <div style={{ marginTop: 12, textAlign: "center", fontSize: 11, color: "#9CA3AF" }}>Tap the bottom nav or any card to navigate</div>
+                )}
             </div>
+
+            {/* Label */}
+            <div style={{ fontSize: 11, color: "#9CA3AF", fontWeight: 600, letterSpacing: 1, textTransform: "uppercase" as const }}>
+                KMK Companion — Interactive Demo · {landscape ? "Landscape" : "Portrait"}
+            </div>
+
+            {/* Phone frame */}
+            <div style={{ background: DARK, borderRadius: landscape ? 36 : 44, padding: landscape ? "10px 12px" : "12px 12px 0", boxShadow: "0 32px 80px rgba(0,0,0,0.35)", width: phoneW, height: phoneH, transition: "all 0.35s cubic-bezier(0.4,0,0.2,1)", flexShrink: 0, overflow: "hidden" }}>
+                {/* Notch / pill */}
+                <div style={{ height: landscape ? 0 : 26, display: landscape ? "none" : "flex", alignItems: "center", justifyContent: "center", marginBottom: 4 }}>
+                    <div style={{ width: 110, height: 13, background: "#000", borderRadius: 20 }} />
+                </div>
+
+                {/* Screen */}
+                <div style={{ background: BG, borderRadius: screenRadius, overflow: "hidden", height: screenH, width: screenW, display: "flex", flexDirection: "column", transition: "all 0.35s cubic-bezier(0.4,0,0.2,1)", position: "relative" }}>
+
+                    {/* Landscape notice banner — only shown when manually toggled to landscape on non-flashcard screens */}
+                    {landscape && screen !== "flashcards" && (
+                        <div style={{ background: "#1A1A1A", padding: "5px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+                            <span style={{ fontSize: 10, color: "#9CA3AF" }}>Landscape view — optimized for flashcards</span>
+                            <button onClick={() => { setScreen("flashcards"); setActiveTab("flashcards"); }} style={{ background: O, border: "none", borderRadius: 6, padding: "2px 8px", fontSize: 10, color: "#fff", fontWeight: 700, cursor: "pointer" }}>Go to Flashcards</button>
+                        </div>
+                    )}
+
+                    {/* Screen content */}
+                    {screen === "dashboard" && <Dashboard onNavigate={navigate} />}
+                    {screen === "subject" && <SubjectDetail subject={selectedSubject || subjects[0]} onBack={goBack} onNavigate={navigate} />}
+                    {screen === "video" && <VideoPlayer onBack={goBack} />}
+                    {screen === "flashcards" && <FlashCards onBack={goBack} />}
+                    {screen === "quiz" && <QuizScreen onBack={goBack} />}
+                    {screen === "profile" && (
+                        <>
+                            <div style={{ background: "#fff", padding: "10px 14px", borderBottom: `1px solid ${BORDER}`, flexShrink: 0 }}>
+                                <div style={{ fontSize: 16, fontWeight: 700, color: DARK }}>Profile</div>
+                            </div>
+                            <ProfileScreen />
+                        </>
+                    )}
+
+                    {/* Bottom nav — hidden in landscape */}
+                    {!landscape && <BottomNav active={activeTab} onTab={handleTab} />}
+
+                </div>
+            </div>
+
+            <div style={{ fontSize: 11, color: "#9CA3AF", textAlign: "center" as const }}>Tap the bottom nav or any card to navigate · Use the toggle above to flip orientation</div>
         </div>
     );
 }
